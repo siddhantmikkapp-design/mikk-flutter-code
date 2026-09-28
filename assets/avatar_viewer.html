@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar Viewer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; background: #000; }
+        #container { width: 100vw; height: 100vh; }
+        #loading {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-size: 20px;
+          text-align: center;
+        }
+        .spinner {
+          border: 4px solid rgba(255,255,255,0.3);
+          border-top: 4px solid white;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 20px;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div id="loading">
+    <div class="spinner"></div>
+    <div>Loading Avatar...</div>
+</div>
+<div id="container"></div>
+
+<script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+      }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    console.log('🎬 Viewer starting...');
+
+    const params = new URLSearchParams(window.location.search);
+    const modelUrl = params.get('modelUrl');
+
+    if (!modelUrl) {
+      document.getElementById('loading').innerHTML = '<div style="color:red">No model URL provided</div>';
+      throw new Error('Model URL required');
+    }
+
+    console.log('📦 Model URL:', modelUrl);
+
+    const container = document.getElementById('container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      100
+    );
+    camera.position.set(0, 1.6, 2.5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    directionalLight.position.set(5, 10, 7.5);
+    scene.add(directionalLight);
+
+    const loader = new GLTFLoader();
+    let avatar;
+
+    loader.load(
+      modelUrl,
+      (gltf) => {
+        console.log('✅ Model loaded');
+        avatar = gltf.scene;
+        scene.add(avatar);
+
+        const box = new THREE.Box3().setFromObject(avatar);
+        const center = box.getCenter(new THREE.Vector3());
+        avatar.position.sub(center);
+        avatar.position.y = 0;
+
+        document.getElementById('loading').style.display = 'none';
+      },
+      (xhr) => {
+        const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
+        console.log(`Loading: ${percent}%`);
+      },
+      (error) => {
+        console.error('❌ Load error:', error);
+        document.getElementById('loading').innerHTML =
+          '<div style="color:red">Failed to load avatar<br><small>' + error.message + '</small></div>';
+      }
+    );
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (avatar) {
+        avatar.rotation.y += 0.005;
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    console.log('✅ Viewer ready');
+</script>
+</body>
+</html>

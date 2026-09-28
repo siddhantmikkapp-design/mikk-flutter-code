@@ -1,0 +1,3 @@
+-keep class com.xraph.plugin.flutter_unity_widget.** { *; }
+-keep class com.unity3d.** { *; }
+-dontwarn com.xraph.plugin.flutter_unity_widget.**

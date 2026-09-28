@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<!-- Import the component -->
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="https://unpkg.com/focus-visible@5.0.2/dist/focus-visible.js" defer></script>
+
+
+</head>
+
+
+<body style="background-color: #000000;">
+
+
+
+<model-viewer
+        id="mikk"
+        loading="eager"
+        camera-controls="true"
+        auto-rotate="true"
+        shadow-intensity="1"
+        poster=""
+        src=""
+        alt="Bold [3D]"
+        ar-status="not-presenting"
+        style="width: 70%; height: 70%; position: absolute; left: 50%; top: 50%; z-index: 0; transform: translate3d(-50%, -50%, 0); display: flex;background-color: #000000;">
+</model-viewer>
+
+<script type="text/javascript">
+    function GetSource(message){
+        document.getElementById("mikk").src = message;
+     }
+      function GetPoster(message){
+         document.getElementById("mikk").poster = message;
+         }
+
+
+</script>
+
+
+</body>
+</html>
